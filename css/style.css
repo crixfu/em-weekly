@@ -50,12 +50,12 @@ header {
 }
 .logo { display: flex; align-items: center; gap: 12px; }
 .logo h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-.logo span { font-size: 13px; opacity: 0.85; }
+.logo span { font-size: 15px; opacity: 0.85; }
 .nav a {
   color: rgba(255,255,255,0.85);
   text-decoration: none;
   margin-left: 20px;
-  font-size: 14px;
+  font-size: 16px;
   transition: color 0.2s;
 }
 .nav a:hover { color: white; }
@@ -76,7 +76,7 @@ header {
   gap: 16px;
 }
 .week-label {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-light);
   margin-bottom: 4px;
 }
@@ -84,7 +84,7 @@ header {
 .stats { display: flex; gap: 20px; flex-wrap: wrap; }
 .stat { text-align: center; }
 .stat-num { font-size: 28px; font-weight: 700; color: var(--primary); line-height: 1; }
-.stat-label { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.stat-label { font-size: 14px; color: var(--text-light); margin-top: 2px; }
 
 /* ── Filter Bar ── */
 .filter-bar {
@@ -101,14 +101,14 @@ header {
   background: white;
   padding: 6px 14px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.2s;
   color: var(--text);
 }
 .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
 .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-.filter-label { font-size: 13px; color: var(--text-light); margin-right: 4px; }
+.filter-label { font-size: 15px; color: var(--text-light); margin-right: 4px; }
 
 /* ── Main Layout ── */
 main {
@@ -138,7 +138,7 @@ main {
 .rank-badge {
   background: var(--primary);
   color: white;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   width: 28px;
   height: 28px;
@@ -158,7 +158,7 @@ main {
   flex-wrap: wrap;
 }
 .journal-tag {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 4px;
@@ -176,7 +176,7 @@ main {
 .tag-other { background: #95a5a6; }
 
 .study-type {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 4px;
@@ -187,19 +187,19 @@ main {
 .type-cohort { color: #27ae60; border-color: #27ae60; background: #f0fff4; }
 .type-secondary { color: #e67e22; border-color: #e67e22; background: #fff8f0; }
 
-.pub-date { font-size: 12px; color: var(--text-light); }
+.pub-date { font-size: 14px; color: var(--text-light); }
 .article-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--secondary);
   line-height: 1.4;
   margin-bottom: 6px;
 }
-.article-authors { font-size: 12px; color: var(--text-light); }
+.article-authors { font-size: 14px; color: var(--text-light); }
 .pmid-link {
   display: inline-block;
   margin-top: 4px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--primary);
   text-decoration: none;
 }
@@ -216,16 +216,16 @@ main {
   align-items: center;
   gap: 8px;
 }
-.section-icon { font-size: 16px; }
+.section-icon { font-size: 18px; }
 .section-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--secondary);
 }
 .section-body {
   display: block;
   padding: 2px 20px 16px 20px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.85;
   color: var(--text);
 }
@@ -238,8 +238,8 @@ main {
   padding: 14px 16px;
   margin: 8px 0 0;
 }
-.conclusion-box h4 { color: var(--primary); font-size: 13px; margin-bottom: 6px; }
-.conclusion-box p { font-size: 14px; line-height: 1.7; }
+.conclusion-box h4 { color: var(--primary); font-size: 15px; margin-bottom: 6px; }
+.conclusion-box p { font-size: 16px; line-height: 1.7; }
 
 /* ── Pros/Cons ── */
 .pros-cons {
@@ -253,9 +253,9 @@ main {
   border-radius: 8px;
   padding: 12px 14px;
 }
-.pros h4 { color: #27ae60; font-size: 13px; margin-bottom: 8px; }
-.cons h4 { color: #e74c3c; font-size: 13px; margin-bottom: 8px; }
-.pros ul, .cons ul { padding-left: 16px; font-size: 13px; }
+.pros h4 { color: #27ae60; font-size: 15px; margin-bottom: 8px; }
+.cons h4 { color: #e74c3c; font-size: 15px; margin-bottom: 8px; }
+.pros ul, .cons ul { padding-left: 16px; font-size: 15px; }
 .pros li { color: #27ae60; margin-bottom: 4px; }
 .pros li span { color: var(--text); }
 .cons li { color: #e74c3c; margin-bottom: 4px; }
@@ -266,7 +266,7 @@ main {
   .header-inner { padding: 12px 16px; }
   .logo h1 { font-size: 18px; }
   main { padding: 0 16px; }
-  .article-title { font-size: 15px; }
+  .article-title { font-size: 17px; }
 }
 
 /* ── Footer ── */
@@ -275,7 +275,7 @@ footer {
   color: rgba(255,255,255,0.7);
   text-align: center;
   padding: 24px;
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 40px;
 }
 footer a { color: rgba(255,255,255,0.85); }
@@ -298,6 +298,6 @@ footer a { color: rgba(255,255,255,0.85); }
   display: block;
 }
 .archive-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.archive-week { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
+.archive-week { font-size: 14px; color: var(--text-light); margin-bottom: 6px; }
 .archive-count { font-size: 24px; font-weight: 700; color: var(--primary); }
-.archive-label { font-size: 12px; color: var(--text-light); }
+.archive-label { font-size: 14px; color: var(--text-light); }

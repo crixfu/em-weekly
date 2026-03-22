@@ -65,11 +65,10 @@ function renderArticle(a) {
         ${renderSection('📊', '詳細研究結果', a.results, true)}
         ${renderSection('💬', '討論', a.discussion)}
         ${renderSection('⚠️', '研究限制', a.limitations)}
-        <div class="section open">
-          <button class="section-toggle" onclick="toggleSection(this)">
-            <span><span class="section-icon">🏆</span>最重要結論</span>
-            <span class="chevron">▼</span>
-          </button>
+        <div class="section">
+          <div class="section-header">
+            <span class="section-icon">🏆</span><span class="section-title">最重要結論</span>
+          </div>
           <div class="section-body">
             <div class="conclusion-box">
               <h4>Claude 分析結論</h4>
@@ -92,21 +91,15 @@ function renderArticle(a) {
   `;
 }
 
-function renderSection(icon, title, content, isOpen = false) {
+function renderSection(icon, title, content) {
   return `
-    <div class="section ${isOpen ? 'open' : ''}">
-      <button class="section-toggle" onclick="toggleSection(this)">
-        <span><span class="section-icon">${icon}</span>${title}</span>
-        <span class="chevron">▼</span>
-      </button>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">${icon}</span><span class="section-title">${title}</span>
+      </div>
       <div class="section-body"><p>${content}</p></div>
     </div>
   `;
-}
-
-function toggleSection(btn) {
-  const section = btn.closest('.section');
-  section.classList.toggle('open');
 }
 
 function filterArticles(type) {

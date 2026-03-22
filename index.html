@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EM Weekly｜急診醫學週報</title>
+  <meta name="description" content="每週精選急診醫學高影響力文獻，包含詳細中文摘要、研究分析與臨床意義。">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚑</text></svg>">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span style="font-size:24px;">🚑</span>
+      <div>
+        <h1>EM Weekly</h1>
+        <span>急診醫學週報｜高影響力文獻精選</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">本週文獻</a>
+      <a href="archive.html">歷史存檔</a>
+      <a href="about.html">關於本站</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="week-label">📅 本週文獻期間</div>
+      <div class="week-title" id="week-range">載入中...</div>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num" id="article-count">—</div>
+        <div class="stat-label">篇精選文獻</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="rct-count">—</div>
+        <div class="stat-label">篇 RCT</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="meta-count">—</div>
+        <div class="stat-label">篇 Meta-Analysis</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">篩選：</span>
+  <button class="filter-btn active" onclick="filterArticles('all')">全部</button>
+  <button class="filter-btn" onclick="filterArticles('RCT')">🔴 RCT</button>
+  <button class="filter-btn" onclick="filterArticles('Meta-Analysis')">🟣 Meta-Analysis</button>
+  <button class="filter-btn" onclick="filterArticles('Cohort Study')">🟢 Cohort Study</button>
+  <button class="filter-btn" onclick="filterArticles('Secondary Analysis')">🟡 次分析</button>
+</div>
+
+<main>
+  <div id="articles">
+    <p style="color:#636e72; text-align:center; padding:40px;">載入中...</p>
+  </div>
+</main>
+
+<footer>
+  <p>EM Weekly 由 Claude AI 每週六凌晨 04:00 自動整理文獻並更新</p>
+  <p style="margin-top:6px;">資料來源：PubMed｜期刊：NEJM · JAMA · Lancet · Annals of EM · Resuscitation · AJEM · Critical Care</p>
+  <p style="margin-top:6px; font-size:11px; opacity:0.7;">本站內容僅供醫療專業人員參考，不代表臨床建議。摘要由 AI 生成，請以原始論文為準。</p>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>

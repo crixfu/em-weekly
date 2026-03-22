@@ -1,0 +1,46 @@
+name: Weekly EM Literature Update
+
+on:
+  schedule:
+    # 每週六凌晨 04:00 台灣時間 = 週五 20:00 UTC
+    - cron: '0 20 * * 5'
+  workflow_dispatch:  # 允許手動觸發
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install anthropic
+
+      - name: Run literature update
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/update_articles.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "EM Weekly Bot"
+          git config user.email "action@github.com"
+          git add data/latest.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            WEEK=$(date -u '+%Y/%m/%d')
+            git commit -m "Weekly update: ${WEEK}"
+            git push
+          fi

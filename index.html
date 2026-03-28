@@ -74,14 +74,23 @@
 
 <script src="js/app.js"></script>
 <script>
-fetch('https://hits.sh/crixfu.github.io/em-weekly.svg')
+fetch('https://hits.sh/crixfu.github.io/em-weekly.svg', {mode:'cors'})
   .then(r => r.text())
   .then(svg => {
-    const matches = [...svg.matchAll(/<text[^>]*>(\d[\d,]*)<\/text>/g)];
-    const count = matches.map(m => m[1].replace(/,/g, '')).filter(n => parseInt(n) > 0).pop();
+    const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
+    const count = [...doc.querySelectorAll('text')]
+      .map(t => t.textContent.trim())
+      .filter(t => /^\d+$/.test(t))
+      .pop();
     if (count) document.getElementById('visit-counter').textContent = '瀏覽次數 ' + parseInt(count).toLocaleString();
   })
-  .catch(() => {});
+  .catch(() => {
+    // CORS blocked: use hidden img to still count, skip display
+    const img = new Image();
+    img.src = 'https://hits.sh/crixfu.github.io/em-weekly.svg';
+    img.style.cssText = 'position:absolute;width:0;height:0;opacity:0;';
+    document.body.appendChild(img);
+  });
 </script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "288c2412a8334be7a6801bc0287df84a"}'></script><!-- End Cloudflare Web Analytics -->
 </body>

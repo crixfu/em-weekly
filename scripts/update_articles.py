@@ -56,7 +56,7 @@ def search_pubmed(journal_query, date_from, date_to, max_results=10):
     """Search PubMed for articles in specific journals within date range."""
     query = f"({journal_query}) AND ({EM_KEYWORDS})"
     encoded = urllib.parse.quote(query)
-    date_range = f"{date_from.replace('/', '')}:{date_to.replace('/', '')}[pdat]"
+    date_range = f"{date_from}:{date_to}[edat]"
     url = (
         f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
         f"?db=pubmed&term={encoded}+AND+{urllib.parse.quote(date_range)}"

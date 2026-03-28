@@ -24,9 +24,7 @@
       <a href="archive.html">歷史存檔</a>
       <a href="about.html">關於本站</a>
     </nav>
-    <div style="font-size:11px; color:rgba(255,255,255,0.7);">
-      瀏覽次數 <img src="https://hits.sh/crixfu.github.io/em-weekly.svg?style=flat&label=&color=white&labelColor=rgba(255%2C255%2C255%2C0.25)" alt="visits" style="vertical-align:middle; height:15px;">
-    </div>
+    <div style="font-size:11px; color:rgba(255,255,255,0.6);" id="visit-counter"></div>
   </div>
 </header>
 
@@ -75,6 +73,16 @@
 </footer>
 
 <script src="js/app.js"></script>
+<script>
+fetch('https://hits.sh/crixfu.github.io/em-weekly.svg')
+  .then(r => r.text())
+  .then(svg => {
+    const matches = [...svg.matchAll(/<text[^>]*>(\d[\d,]*)<\/text>/g)];
+    const count = matches.map(m => m[1].replace(/,/g, '')).filter(n => parseInt(n) > 0).pop();
+    if (count) document.getElementById('visit-counter').textContent = '瀏覽次數 ' + parseInt(count).toLocaleString();
+  })
+  .catch(() => {});
+</script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "288c2412a8334be7a6801bc0287df84a"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

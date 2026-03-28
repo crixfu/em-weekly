@@ -78,7 +78,8 @@
 fetch('https://crixfu.goatcounter.com/counter//em-weekly/.json')
   .then(r => r.json())
   .then(d => {
-    if (d.count) document.getElementById('visit-counter').textContent = '瀏覽次數 ' + d.count;
+    const n = parseInt((d.count || '0').replace(/,/g, ''));
+    if (n > 0) document.getElementById('visit-counter').textContent = '瀏覽次數 ' + d.count;
   })
   .catch(() => {});
 </script>

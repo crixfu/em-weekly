@@ -15,24 +15,31 @@ import time
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
-TARGET_JOURNALS = [
-    '"N Engl J Med"[Journal]',
-    '"JAMA"[Journal]',
-    '"Lancet"[Journal]',
-    '"Ann Emerg Med"[Journal]',
-    '"Resuscitation"[Journal]',
-    '"Am J Emerg Med"[Journal]',
-    '"Crit Care"[Journal]',
-    '"Acad Emerg Med"[Journal]',
-    '"Emerg Med J"[Journal]',
-    '"BMJ"[Journal]',
-]
-
 EM_KEYWORDS = (
     "emergency OR resuscitation OR cardiac arrest OR sepsis OR trauma OR "
     "shock OR critical care OR ventilation OR hemorrhage OR stroke OR "
-    "toxicology OR overdose OR anaphylaxis OR airway"
+    "toxicology OR overdose OR anaphylaxis OR airway OR intubation OR "
+    "defibrillation OR CPR OR OHCA OR ECMO OR triage OR prehospital"
 )
+
+# Journal groups: (query, apply_em_keyword_filter)
+# EM-dedicated journals don't need keyword filter; specialty journals do
+JOURNAL_GROUPS = [
+    # Top general medical journals — filter by EM keywords
+    ('"N Engl J Med"[Journal] OR "JAMA"[Journal] OR "Lancet"[Journal] OR "BMJ"[Journal] OR "NEJM Evidence"[Journal] OR "JAMA Intern Med"[Journal]', True),
+    # Dedicated EM & resuscitation journals — no filter needed
+    ('"Ann Emerg Med"[Journal] OR "Acad Emerg Med"[Journal] OR "Am J Emerg Med"[Journal] OR "Emerg Med J"[Journal] OR "Resuscitation"[Journal] OR "Prehosp Emerg Care"[Journal]', False),
+    # Critical care & respiratory — filter by EM keywords
+    ('"Crit Care"[Journal] OR "Critical Care Medicine"[Journal] OR "Intensive Care Med"[Journal] OR "Chest"[Journal] OR "Am J Respir Crit Care Med"[Journal]', True),
+    # Cardiology — filter by EM keywords
+    ('"Circulation"[Journal] OR "J Am Coll Cardiol"[Journal] OR "Eur Heart J"[Journal] OR "JAMA Cardiol"[Journal] OR "Heart Rhythm"[Journal]', True),
+    # Neurology — filter by EM keywords
+    ('"Stroke"[Journal] OR "Neurology"[Journal] OR "JAMA Neurol"[Journal] OR "Lancet Neurol"[Journal]', True),
+    # Trauma, surgery, toxicology
+    ('"J Trauma Acute Care Surg"[Journal] OR "Clin Toxicol (Phila)"[Journal] OR "Ann Surg"[Journal]', True),
+    # Infectious disease & pediatrics
+    ('"Clin Infect Dis"[Journal] OR "Pediatrics"[Journal] OR "Pediatr Emerg Care"[Journal]', True),
+]
 
 
 def get_date_range():
@@ -52,9 +59,12 @@ def fetch_url(url, timeout=30):
         return ""
 
 
-def search_pubmed(journal_query, date_from, date_to, max_results=10):
+def search_pubmed(journal_query, date_from, date_to, max_results=10, use_em_filter=True):
     """Search PubMed for articles in specific journals within date range."""
-    query = f"({journal_query}) AND ({EM_KEYWORDS})"
+    if use_em_filter:
+        query = f"({journal_query}) AND ({EM_KEYWORDS})"
+    else:
+        query = journal_query
     encoded = urllib.parse.quote(query)
     date_range = f"{date_from}:{date_to}[edat]"
     url = (
@@ -230,18 +240,9 @@ def main():
 
     # Collect PMIDs from all target journals
     all_pmids = []
-    journal_groups = [
-        # High-impact general journals with EM filter
-        ' OR '.join(['"N Engl J Med"[Journal]', '"JAMA"[Journal]', '"Lancet"[Journal]', '"BMJ"[Journal]']),
-        # Dedicated EM journals (no keyword filter needed)
-        '"Ann Emerg Med"[Journal] OR "Resuscitation"[Journal] OR "Am J Emerg Med"[Journal] OR "Acad Emerg Med"[Journal] OR "Emerg Med J"[Journal]',
-        # Critical care
-        '"Crit Care"[Journal] OR "Critical Care Medicine"[Journal]',
-    ]
-
-    for group in journal_groups:
-        pmids = search_pubmed(group, date_from, date_to, max_results=15)
-        print(f"  Found {len(pmids)} PMIDs")
+    for journal_query, use_em_filter in JOURNAL_GROUPS:
+        pmids = search_pubmed(journal_query, date_from, date_to, max_results=15, use_em_filter=use_em_filter)
+        print(f"  Found {len(pmids)} PMIDs ({'filtered' if use_em_filter else 'all'})")
         all_pmids.extend(pmids)
         time.sleep(0.5)
 
@@ -252,7 +253,7 @@ def main():
 
     # Fetch abstracts and filter
     candidates = []
-    for pmid in unique_pmids[:40]:
+    for pmid in unique_pmids[:80]:
         abstract = get_abstract(pmid)
         if abstract and is_relevant_to_em(abstract):
             study_type = classify_study_type(abstract)

@@ -1,9 +1,9 @@
-name: Weekly EM Literature Update
+name: Biweekly EM Literature Update
 
 on:
   schedule:
-    # 每週六凌晨 04:00 台灣時間 = 週五 20:00 UTC
-    - cron: '0 20 * * 5'
+    # 每隔兩週，每月 1 日及 15 日 20:00 UTC（台灣時間隔日 04:00）
+    - cron: '0 20 1,15 * *'
   workflow_dispatch:  # 允許手動觸發
 
 permissions:
@@ -41,6 +41,6 @@ jobs:
             echo "No changes to commit"
           else
             WEEK=$(date -u '+%Y/%m/%d')
-            git commit -m "Weekly update: ${WEEK}"
+            git commit -m "Biweekly update: ${WEEK}"
             git push
           fi

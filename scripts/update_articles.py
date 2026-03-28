@@ -37,7 +37,7 @@ EM_KEYWORDS = (
 
 def get_date_range():
     today = datetime.date.today()
-    start = today - datetime.timedelta(days=7)
+    start = today - datetime.timedelta(days=14)
     return start.strftime("%Y/%m/%d"), today.strftime("%Y/%m/%d"), \
            start.strftime("%Y/%m/%d"), today.strftime("%Y/%m/%d")
 

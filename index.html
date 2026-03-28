@@ -75,13 +75,13 @@
 <script src="js/app.js"></script>
 <script data-goatcounter="https://crixfu.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script>
-const gcPaths = ['/em-weekly/', '/em-weekly/index.html', '/em-weekly/archive.html', '/em-weekly/about.html'];
-Promise.all(gcPaths.map(p =>
-  fetch('https://crixfu.goatcounter.com/counter/' + p + '.json').then(r => r.json()).catch(() => ({count:'0'}))
-)).then(results => {
-  const total = results.reduce((sum, d) => sum + parseInt((d.count || '0').replace(/,/g, '')), 0);
-  if (total > 0) document.getElementById('visit-counter').textContent = '瀏覽次數 ' + total.toLocaleString();
-});
+fetch('https://crixfu.goatcounter.com/counter//em-weekly/index.html.json')
+  .then(r => r.json())
+  .then(d => {
+    const n = parseInt((d.count || '0').replace(/,/g, ''));
+    if (n > 0) document.getElementById('visit-counter').textContent = '瀏覽次數 ' + d.count;
+  })
+  .catch(() => {});
 </script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "288c2412a8334be7a6801bc0287df84a"}'></script><!-- End Cloudflare Web Analytics -->
 </body>

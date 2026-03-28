@@ -29,17 +29,109 @@
   <h2 style="font-size:22px; color:#2c3e50; margin-bottom:8px;">📚 歷史文獻存檔</h2>
   <p style="color:#636e72; font-size:14px; margin-bottom:24px;">每週六自動更新，點選週次查看完整文獻摘要</p>
   <div class="archive-grid" id="archive-list">
-    <div class="archive-card">
-      <div class="archive-week">2026/03/14 – 2026/03/21</div>
-      <div class="archive-count">2</div>
-      <div class="archive-label">篇文獻（示範版）</div>
-      <div style="margin-top:8px; font-size:12px; color:#c0392b;">→ 本週最新</div>
-    </div>
+    <p style="color:#636e72;">載入中…</p>
   </div>
 </main>
+
+<div id="archive-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; overflow-y:auto; padding:40px 16px;">
+  <div style="max-width:900px; margin:0 auto; background:#fff; border-radius:12px; padding:32px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h2 id="modal-title" style="font-size:20px; color:#2c3e50; margin:0;"></h2>
+      <button onclick="closeModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#636e72;">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
 
 <footer>
   <p>EM Weekly 由 Claude AI 每週六凌晨 04:00 自動整理文獻並更新</p>
 </footer>
+
+<script>
+const CATEGORY_COLORS = {
+  'RCT': '#e74c3c',
+  'Meta-Analysis': '#8e44ad',
+  'Cohort Study': '#2980b9',
+  'Secondary Analysis': '#27ae60'
+};
+
+async function loadArchive() {
+  const list = document.getElementById('archive-list');
+  try {
+    const res = await fetch('data/archive/index.json?t=' + Date.now());
+    const items = await res.json();
+
+    if (!items.length) {
+      list.innerHTML = '<p style="color:#636e72;">尚無歷史存檔</p>';
+      return;
+    }
+
+    // Sort newest first
+    items.sort((a, b) => b.generated.localeCompare(a.generated));
+
+    list.innerHTML = items.map((item, i) => `
+      <div class="archive-card" onclick="openArchive('${item.file}', '${item.week}')" style="cursor:pointer;">
+        <div class="archive-week">${item.week}</div>
+        <div class="archive-count">${item.count}</div>
+        <div class="archive-label">篇文獻</div>
+        ${i === 0 ? '<div style="margin-top:8px; font-size:12px; color:#c0392b;">→ 最新存檔</div>' : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<p style="color:#636e72;">載入失敗，請稍後再試</p>';
+  }
+}
+
+async function openArchive(file, week) {
+  const modal = document.getElementById('archive-modal');
+  const body = document.getElementById('modal-body');
+  document.getElementById('modal-title').textContent = `📅 ${week}`;
+  body.innerHTML = '<p style="color:#636e72;">載入中…</p>';
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const res = await fetch('data/archive/' + file + '?t=' + Date.now());
+    const data = await res.json();
+    renderArticles(data.articles, body);
+  } catch (e) {
+    body.innerHTML = '<p style="color:#c0392b;">載入失敗</p>';
+  }
+}
+
+function closeModal() {
+  document.getElementById('archive-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('archive-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function renderArticles(articles, container) {
+  container.innerHTML = articles.map(a => {
+    const color = CATEGORY_COLORS[a.category] || '#7f8c8d';
+    return `
+      <div style="border:1px solid #e0e0e0; border-radius:10px; padding:20px; margin-bottom:20px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+          <span style="background:${color}; color:#fff; font-size:12px; padding:3px 10px; border-radius:12px;">${a.category}</span>
+          <span style="background:#f0f0f0; color:#555; font-size:12px; padding:3px 10px; border-radius:12px;">${a.journal_abbr || a.journal}</span>
+        </div>
+        <h3 style="font-size:16px; color:#2c3e50; margin:0 0 6px;">${a.title}</h3>
+        <p style="font-size:13px; color:#636e72; margin:0 0 14px;">${a.authors} · ${a.pubdate}</p>
+        <div style="display:grid; gap:10px;">
+          <div><strong style="color:#2c3e50;">背景</strong><p style="margin:4px 0 0; font-size:14px;">${a.background}</p></div>
+          <div><strong style="color:#2c3e50;">方法</strong><p style="margin:4px 0 0; font-size:14px;">${a.methods}</p></div>
+          <div><strong style="color:#2c3e50;">結果</strong><p style="margin:4px 0 0; font-size:14px;">${a.results}</p></div>
+          <div><strong style="color:#2c3e50;">結論</strong><p style="margin:4px 0 0; font-size:14px;">${a.conclusion}</p></div>
+        </div>
+        ${a.pmid ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${a.pmid}/" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:#2980b9;">PubMed →</a>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+loadArchive();
+</script>
 </body>
 </html>

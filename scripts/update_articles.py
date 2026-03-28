@@ -248,6 +248,41 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     repo_root = os.path.dirname(script_dir)
     output_path = os.path.join(repo_root, "data", "latest.json")
+    archive_dir = os.path.join(repo_root, "data", "archive")
+    os.makedirs(archive_dir, exist_ok=True)
+
+    # Archive previous week's data before overwriting
+    if os.path.exists(output_path):
+        try:
+            with open(output_path, encoding="utf-8") as f:
+                prev = json.load(f)
+            prev_generated = prev.get("generated", "")
+            prev_count = len(prev.get("articles", []))
+            if prev_generated and prev_count > 0:
+                archive_file = os.path.join(archive_dir, f"{prev_generated}.json")
+                if not os.path.exists(archive_file):
+                    with open(archive_file, "w", encoding="utf-8") as f:
+                        json.dump(prev, f, ensure_ascii=False, indent=2)
+                    print(f"Archived previous week to {prev_generated}.json")
+
+                    # Update archive index
+                    index_path = os.path.join(archive_dir, "index.json")
+                    index = []
+                    if os.path.exists(index_path):
+                        with open(index_path, encoding="utf-8") as f:
+                            index = json.load(f)
+                    index.append({
+                        "week": prev.get("week", ""),
+                        "file": f"{prev_generated}.json",
+                        "count": prev_count,
+                        "generated": prev_generated
+                    })
+                    with open(index_path, "w", encoding="utf-8") as f:
+                        json.dump(index, f, ensure_ascii=False, indent=2)
+                    print(f"Updated archive index ({len(index)} entries)")
+        except Exception as e:
+            print(f"Archive warning: {e}")
+
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 

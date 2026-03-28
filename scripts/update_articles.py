@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-EM Weekly — 每週急診文獻自動更新腳本
+EM Biweekly — 每週急診文獻自動更新腳本
 每週六凌晨 04:00（台灣時間）執行
 搜尋 PubMed → 呼叫 Claude API 生成摘要 → 更新 data/latest.json
 """

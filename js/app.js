@@ -1,4 +1,4 @@
-// EM Weekly — app.js
+// EM Biweekly — app.js
 
 const JOURNAL_TAGS = {
   'NEJM': 'tag-nejm',

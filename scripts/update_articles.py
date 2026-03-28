@@ -163,6 +163,54 @@ PubMed 摘要：
     return None
 
 
+def screen_articles_by_importance(candidates):
+    """Use Claude to select clinically important articles from candidates (5-20)."""
+    if not candidates:
+        return []
+
+    # Build a compact list of abstracts for screening
+    items = []
+    for i, (priority, pmid, abstract) in enumerate(candidates[:40], 1):
+        # Truncate abstract to first 800 chars for screening efficiency
+        items.append(f"[{i}] PMID:{pmid}\n{abstract[:800]}")
+
+    prompt = f"""你是一位資深急診醫師，正在為每週急診文獻週報篩選文章。
+
+以下是本週 PubMed 的候選文章摘要（共 {len(items)} 篇）。請以專業急診醫師的角度，選出真正值得急診科醫師閱讀的文章。
+
+選文標準：
+- 直接影響急診臨床決策（用藥、操作、診斷、處置）
+- 研究族群與急診相關（急診病患、重症、院前、加護）
+- 結果具實際意義（不只是統計顯著，要有臨床意義）
+- 優先選 RCT、高品質 Cohort、重要 Meta-analysis
+- 排除：純基礎研究、門診追蹤研究、與急診無關的亞族群分析
+
+選取數量：5 至 20 篇，寧缺勿濫，沒有重要文章就少選。
+
+候選文章：
+{'='*60}
+{chr(10).join(items)}
+{'='*60}
+
+請直接輸出被選中的 PMID 清單，格式如下（只輸出 JSON，不要其他說明）：
+{{"selected_pmids": ["12345678", "23456789", ...]}}"""
+
+    try:
+        text = call_claude(prompt)
+        match = re.search(r'\{[\s\S]*\}', text)
+        if match:
+            result = json.loads(match.group())
+            pmids = result.get("selected_pmids", [])
+            print(f"  Claude selected PMIDs: {pmids}")
+            return set(str(p) for p in pmids)
+    except Exception as e:
+        print(f"  Screening error: {e}, falling back to top candidates")
+        # Fallback: take top 12 by priority
+        return set(pmid for (_, pmid, _) in candidates[:12])
+
+    return set(pmid for (_, pmid, _) in candidates[:12])
+
+
 def is_relevant_to_em(abstract_text):
     """Filter articles relevant to emergency medicine."""
     text = abstract_text.lower()
@@ -219,8 +267,12 @@ def main():
 
     # Sort: RCTs first, then meta, then cohort
     candidates.sort(key=lambda x: -x[0])
-    selected = candidates[:18]  # Max 18 articles
-    print(f"Selected {len(selected)} articles for summarization")
+    print(f"Total candidates: {len(candidates)}, running clinical importance screening...")
+
+    # Ask Claude to screen which articles are truly important for EM physicians
+    selected_pmids = screen_articles_by_importance(candidates)
+    selected = [(p, pmid, ab) for (p, pmid, ab) in candidates if pmid in selected_pmids]
+    print(f"Selected {len(selected)} articles after clinical screening")
 
     # Generate summaries with Claude
     articles = []

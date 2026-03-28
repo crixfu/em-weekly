@@ -289,7 +289,7 @@ def main():
 
     # Build output
     today = datetime.date.today()
-    week_start = today - datetime.timedelta(days=7)
+    week_start = today - datetime.timedelta(days=14)
     output = {
         "week": f"{week_start.strftime('%Y/%m/%d')} – {today.strftime('%Y/%m/%d')}",
         "generated": today.strftime("%Y-%m-%d"),

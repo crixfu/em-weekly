@@ -58,46 +58,59 @@ const CATEGORY_COLORS = {
 async function loadArchive() {
   const list = document.getElementById('archive-list');
   try {
-    const res = await fetch('data/archive/index.json?t=' + Date.now());
-    const items = await res.json();
-
-    if (!items.length) {
-      list.innerHTML = '<p style="color:#636e72;">尚無歷史存檔</p>';
-      return;
-    }
+    // Fetch current issue and archive index in parallel
+    const [latestRes, indexRes] = await Promise.all([
+      fetch('data/latest.json?t=' + Date.now()),
+      fetch('data/archive/index.json?t=' + Date.now())
+    ]);
+    const latest = await latestRes.json();
+    const items = await indexRes.json();
 
     items.sort((a, b) => b.generated.localeCompare(a.generated));
 
-    // Load all issues to get article titles for preview
-    const sections = await Promise.all(items.map(async (item, i) => {
+    // Load all archived issues for title preview
+    const sections = await Promise.all(items.map(async (item) => {
       const r = await fetch('data/archive/' + item.file + '?t=' + Date.now());
       const data = await r.json();
-      return { item, articles: data.articles, i };
+      return { item, articles: data.articles };
     }));
 
-    list.innerHTML = sections.map(({ item, articles, i }) => `
-      <div class="archive-card" onclick="openArchive('${item.file}', '${item.week}')" style="cursor:pointer;">
-        <div class="archive-week">${item.week}</div>
-        <div class="archive-count">${item.count}</div>
-        <div class="archive-label">篇文獻</div>
-        ${i === 0 ? '<div style="margin-top:6px; font-size:12px; color:#c0392b;">→ 最新存檔</div>' : ''}
-        <div style="margin-top:12px; border-top:1px solid #eee; padding-top:10px; text-align:left;">
-          ${articles.map(a => {
-            const color = CATEGORY_COLORS[a.category] || '#7f8c8d';
-            return `<div style="display:flex; align-items:baseline; gap:6px; margin-bottom:5px;">
-              <span style="flex-shrink:0; background:${color}; color:#fff; font-size:10px; padding:1px 6px; border-radius:8px;">${a.category.replace('Cohort Study','Cohort').replace('Secondary Analysis','2nd').replace('Meta-Analysis','Meta')}</span>
-              <span style="font-size:12px; color:#2c3e50; line-height:1.4; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical;">${a.title}</span>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-    `).join('');
+    const currentCard = buildCard(latest.week, latest.articles, true, 'latest');
+    const archivedCards = sections.map(({ item, articles }) =>
+      buildCard(item.week, articles, false, item.file)
+    ).join('');
+
+    list.innerHTML = currentCard + archivedCards;
   } catch (e) {
     list.innerHTML = '<p style="color:#636e72;">載入失敗，請稍後再試</p>';
   }
 }
 
-async function openArchive(file, week) {
+function buildCard(week, articles, isCurrent, fileOrKey) {
+  const borderStyle = isCurrent ? 'border:2px solid #27ae60;' : '';
+  const badge = isCurrent
+    ? '<div style="margin-top:6px; font-size:12px; color:#27ae60; font-weight:600;">● 本期</div>'
+    : '';
+  return `
+    <div class="archive-card" onclick="openIssue('${fileOrKey}', '${week}')" style="cursor:pointer; ${borderStyle}">
+      <div class="archive-week">${week}</div>
+      <div class="archive-count">${articles.length}</div>
+      <div class="archive-label">篇文獻</div>
+      ${badge}
+      <div style="margin-top:12px; border-top:1px solid #eee; padding-top:10px; text-align:left;">
+        ${articles.map(a => {
+          const color = CATEGORY_COLORS[a.category] || '#7f8c8d';
+          return `<div style="display:flex; align-items:baseline; gap:6px; margin-bottom:5px;">
+            <span style="flex-shrink:0; background:${color}; color:#fff; font-size:10px; padding:1px 6px; border-radius:8px;">${a.category.replace('Cohort Study','Cohort').replace('Secondary Analysis','2nd').replace('Meta-Analysis','Meta')}</span>
+            <span style="font-size:12px; color:#2c3e50; line-height:1.4; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical;">${a.title}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+async function openIssue(fileOrKey, week) {
   const modal = document.getElementById('archive-modal');
   const body = document.getElementById('modal-body');
   document.getElementById('modal-title').textContent = `📅 ${week}`;
@@ -106,7 +119,10 @@ async function openArchive(file, week) {
   document.body.style.overflow = 'hidden';
 
   try {
-    const res = await fetch('data/archive/' + file + '?t=' + Date.now());
+    const url = fileOrKey === 'latest'
+      ? 'data/latest.json?t=' + Date.now()
+      : 'data/archive/' + fileOrKey + '?t=' + Date.now();
+    const res = await fetch(url);
     const data = await res.json();
     renderArticles(data.articles, body);
   } catch (e) {

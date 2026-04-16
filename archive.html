@@ -145,38 +145,49 @@ function renderEbmBlock(a) {
   let fields = [];
   if (a.study_design === 'treatment') {
     fields = [
-      { key: 'arr', label: 'ARR',  desc: '絕對風險差' },
-      { key: 'rrr', label: 'RRR',  desc: '相對風險降低' },
-      { key: 'nnt', label: 'NNT',  desc: '需治療人數' },
-      { key: 'hr',  label: 'HR',   desc: '危險比' },
-      { key: 'or',  label: 'OR',   desc: '勝算比' },
-      { key: 'nnh', label: 'NNH',  desc: '傷害需治人數' },
+      { key: 'arr', label: 'ARR',  desc: '絕對風險差 (Absolute Risk Reduction)' },
+      { key: 'rrr', label: 'RRR',  desc: '相對風險降低 (Relative Risk Reduction)' },
+      { key: 'nnt', label: 'NNT',  desc: '需治療人數 (Number Needed to Treat)' },
+      { key: 'hr',  label: 'HR',   desc: '危險比 (Hazard Ratio)' },
+      { key: 'or',  label: 'OR',   desc: '勝算比 (Odds Ratio)' },
+      { key: 'nnh', label: 'NNH',  desc: '傷害需治人數 (Number Needed to Harm)' },
     ];
   } else if (a.study_design === 'diagnostic') {
     fields = [
       { key: 'sensitivity', label: 'Sensitivity', desc: '敏感度' },
       { key: 'specificity', label: 'Specificity', desc: '特異度' },
-      { key: 'lr_pos',      label: 'LR+',         desc: '陽性似然比' },
-      { key: 'lr_neg',      label: 'LR−',         desc: '陰性似然比' },
-      { key: 'ppv',         label: 'PPV',         desc: '陽性預測值' },
-      { key: 'npv',         label: 'NPV',         desc: '陰性預測值' },
+      { key: 'lr_pos',      label: 'LR+',         desc: '陽性似然比 (Positive Likelihood Ratio)' },
+      { key: 'lr_neg',      label: 'LR−',         desc: '陰性似然比 (Negative Likelihood Ratio)' },
+      { key: 'ppv',         label: 'PPV',         desc: '陽性預測值 (Positive Predictive Value)' },
+      { key: 'npv',         label: 'NPV',         desc: '陰性預測值 (Negative Predictive Value)' },
       { key: 'auc',         label: 'AUC',         desc: 'ROC 曲線下面積' },
     ];
   }
   const visible = fields.filter(f => stats[f.key] != null);
   if (visible.length === 0) return '';
-  const cells = visible.map(f => `
-    <div style="background:#f0f4f8; border-radius:8px; padding:8px 10px; text-align:center; min-width:85px;">
-      <div style="font-size:10px; color:#636e72; font-weight:600;">${f.label}</div>
-      <div style="font-size:14px; font-weight:700; color:#2c3e50; word-break:break-word;">${stats[f.key]}</div>
-      <div style="font-size:10px; color:#95a5a6;">${f.desc}</div>
-    </div>`).join('');
+  const rows = visible.map(f => `
+    <tr>
+      <td style="padding:7px 10px; font-weight:700; color:#2c3e50; white-space:nowrap; width:1%; border-bottom:1px solid #eef0f3;">${f.label}</td>
+      <td style="padding:7px 10px; color:#2980b9; font-weight:600; white-space:nowrap; border-bottom:1px solid #eef0f3;">${stats[f.key]}</td>
+      <td style="padding:7px 10px; color:#636e72; font-size:12px; border-bottom:1px solid #eef0f3;">${f.desc}</td>
+    </tr>`).join('');
   const noteHTML = stats.note
-    ? `<p style="margin:8px 0 0; font-size:12px; color:#7f8c8d;">📝 ${stats.note}</p>` : '';
+    ? `<p style="margin:8px 0 0; font-size:12px; color:#7f8c8d; line-height:1.5;">📝 ${stats.note}</p>` : '';
   return `
     <div style="margin:12px 0;">
       <strong style="color:#2c3e50; font-size:13px;">📐 EBM 關鍵數值</strong>
-      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">${cells}</div>
+      <div style="overflow-x:auto; margin-top:8px;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px; background:#fafbfc; border-radius:8px; overflow:hidden; border:1px solid #eef0f3;">
+          <thead>
+            <tr style="background:#eef0f3;">
+              <th style="padding:7px 10px; text-align:left; color:#636e72; font-size:11px; font-weight:600; letter-spacing:0.5px;">指標</th>
+              <th style="padding:7px 10px; text-align:left; color:#636e72; font-size:11px; font-weight:600; letter-spacing:0.5px;">數值</th>
+              <th style="padding:7px 10px; text-align:left; color:#636e72; font-size:11px; font-weight:600; letter-spacing:0.5px;">說明</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
       ${noteHTML}
     </div>`;
 }

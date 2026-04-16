@@ -63,6 +63,7 @@ function renderArticle(a) {
         ${renderSection('📋', '研究背景', a.background)}
         ${renderSection('🔬', '研究設計與方法', a.methods)}
         ${renderSection('📊', '詳細研究結果', a.results, true)}
+        ${renderEbmStats(a)}
         ${renderSection('💬', '討論', a.discussion)}
         ${renderSection('⚠️', '研究限制', a.limitations)}
         <div class="section">
@@ -98,6 +99,63 @@ function renderSection(icon, title, content) {
         <span class="section-icon">${icon}</span><span class="section-title">${title}</span>
       </div>
       <div class="section-body"><p>${content}</p></div>
+    </div>
+  `;
+}
+
+function renderEbmStats(a) {
+  if (!a.ebm_stats || !a.study_design || a.study_design === 'other') return '';
+
+  const stats = a.ebm_stats;
+  let fields = [];
+
+  if (a.study_design === 'treatment') {
+    fields = [
+      { key: 'arr', label: 'ARR',  desc: '絕對風險差' },
+      { key: 'rrr', label: 'RRR',  desc: '相對風險降低' },
+      { key: 'nnt', label: 'NNT',  desc: '需治療人數' },
+      { key: 'hr',  label: 'HR',   desc: '危險比' },
+      { key: 'or',  label: 'OR',   desc: '勝算比' },
+      { key: 'nnh', label: 'NNH',  desc: '傷害需治人數' },
+    ];
+  } else if (a.study_design === 'diagnostic') {
+    fields = [
+      { key: 'sensitivity', label: 'Sensitivity', desc: '敏感度' },
+      { key: 'specificity', label: 'Specificity', desc: '特異度' },
+      { key: 'lr_pos',      label: 'LR+',         desc: '陽性似然比' },
+      { key: 'lr_neg',      label: 'LR−',         desc: '陰性似然比' },
+      { key: 'ppv',         label: 'PPV',         desc: '陽性預測值' },
+      { key: 'npv',         label: 'NPV',         desc: '陰性預測值' },
+      { key: 'auc',         label: 'AUC',         desc: 'ROC 曲線下面積' },
+    ];
+  }
+
+  const visible = fields.filter(f => stats[f.key] != null);
+  if (visible.length === 0) return '';
+
+  const cells = visible.map(f => `
+    <div style="background:#f0f4f8; border-radius:8px; padding:10px 12px; text-align:center; min-width:90px;">
+      <div style="font-size:11px; color:#636e72; margin-bottom:3px; font-weight:600; letter-spacing:0.5px;">${f.label}</div>
+      <div style="font-size:15px; font-weight:700; color:#2c3e50; word-break:break-word;">${stats[f.key]}</div>
+      <div style="font-size:10px; color:#95a5a6; margin-top:2px;">${f.desc}</div>
+    </div>
+  `).join('');
+
+  const noteHTML = stats.note
+    ? `<p style="margin:10px 0 0; font-size:12px; color:#7f8c8d; line-height:1.5;">📝 ${stats.note}</p>`
+    : '';
+
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">📐</span><span class="section-title">EBM 關鍵數值</span>
+      </div>
+      <div class="section-body">
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          ${cells}
+        </div>
+        ${noteHTML}
+      </div>
     </div>
   `;
 }

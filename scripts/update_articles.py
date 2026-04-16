@@ -131,12 +131,28 @@ def classify_study_type(abstract_text):
 
 def generate_article_summary(pmid, abstract_text, rank):
     """Use Claude to generate detailed Chinese summary."""
-    prompt = f"""你是一位急診醫學論文研讀專家。請根據以下 PubMed 摘要，生成一個 JSON 格式的詳細中文文獻摘要。
+    prompt = f"""你是一位急診醫學論文研讀專家，同時精通實證醫學（EBM）統計。請根據以下 PubMed 摘要，生成一個 JSON 格式的詳細中文文獻摘要。
+
+【ebm_stats 填寫規則】
+1. 先判斷 study_design：
+   - "treatment"：評估介入/藥物/手術/流程的效果（包含 RCT、觀察性比較研究）
+   - "diagnostic"：評估診斷工具、生物標記、臨床評分的準確度
+   - "other"：預後、流行病學、品質改善等其他類型
+2. treatment → 填 arr, rrr, nnt, hr, or, nnh（從主要終點計算；無法獲得填 null）
+   - ARR = |對照組事件率 - 治療組事件率|
+   - RRR = ARR ÷ 對照組事件率
+   - NNT = 1 ÷ ARR（四捨五入至整數）
+3. diagnostic → 填 sensitivity, specificity, lr_pos, lr_neg, ppv, npv, auc
+   - lr_pos = Sensitivity ÷ (1 - Specificity)（可自行計算）
+   - lr_neg = (1 - Sensitivity) ÷ Specificity（可自行計算）
+   - PPV/NPV 若未直接提供，填字串 "取決於盛行率"
+4. other → 所有數值欄位填 null，只填 note
+5. 無法從摘要獲得的欄位填 null（不要填 0 或估計值）
 
 PubMed 摘要：
 {abstract_text[:3000]}
 
-請直接輸出 JSON，格式如下（所有字段用繁體中文，不要有額外說明）：
+請直接輸出 JSON（描述性欄位用繁體中文，不要有額外說明）：
 {{
   "title": "論文英文標題",
   "authors": "第一作者 et al. (試驗名稱如有)",
@@ -154,7 +170,24 @@ PubMed 摘要：
   "limitations": "研究限制，條列式 3-5 點，以句號結尾，用換行分隔",
   "conclusion": "最重要結論（Claude 分析，50-80字）",
   "pros": ["優點1", "優點2", "優點3"],
-  "cons": ["缺點1", "缺點2", "缺點3"]
+  "cons": ["缺點1", "缺點2", "缺點3"],
+  "study_design": "treatment 或 diagnostic 或 other",
+  "ebm_stats": {{
+    "arr": "絕對風險差，如 '3.2%'（treatment 適用），null if N/A",
+    "rrr": "相對風險降低，如 '25%'（treatment 適用），null if N/A",
+    "nnt": "需治療人數，如 '31'（treatment 適用），null if N/A",
+    "hr": "危險比含CI，如 '0.75 (95% CI 0.60–0.94)'（treatment 適用），null if N/A",
+    "or": "勝算比含CI，如 '0.68 (95% CI 0.52–0.89)'（treatment 適用），null if N/A",
+    "nnh": "傷害需治人數（主要嚴重副作用），如 '50'（treatment 適用），null if N/A",
+    "sensitivity": "敏感度，如 '87.3%'（diagnostic 適用），null if N/A",
+    "specificity": "特異度，如 '72.1%'（diagnostic 適用），null if N/A",
+    "lr_pos": "陽性似然比，如 '3.14'（diagnostic 適用，可自行計算），null if N/A",
+    "lr_neg": "陰性似然比，如 '0.18'（diagnostic 適用，可自行計算），null if N/A",
+    "ppv": "陽性預測值，如 '65%' 或 '取決於盛行率'（diagnostic 適用），null if N/A",
+    "npv": "陰性預測值，如 '91%' 或 '取決於盛行率'（diagnostic 適用），null if N/A",
+    "auc": "AUC/AUROC 含CI，如 '0.89 (95% CI 0.84–0.93)'（diagnostic 適用），null if N/A",
+    "note": "計算說明：用哪個 endpoint 計算 NNT/ARR、cut-off 值、研究盛行率、PPV/NPV 假設等"
+  }}
 }}"""
 
     try:

@@ -139,6 +139,48 @@ document.getElementById('archive-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
 
+function renderEbmBlock(a) {
+  if (!a.ebm_stats || !a.study_design || a.study_design === 'other') return '';
+  const stats = a.ebm_stats;
+  let fields = [];
+  if (a.study_design === 'treatment') {
+    fields = [
+      { key: 'arr', label: 'ARR',  desc: '絕對風險差' },
+      { key: 'rrr', label: 'RRR',  desc: '相對風險降低' },
+      { key: 'nnt', label: 'NNT',  desc: '需治療人數' },
+      { key: 'hr',  label: 'HR',   desc: '危險比' },
+      { key: 'or',  label: 'OR',   desc: '勝算比' },
+      { key: 'nnh', label: 'NNH',  desc: '傷害需治人數' },
+    ];
+  } else if (a.study_design === 'diagnostic') {
+    fields = [
+      { key: 'sensitivity', label: 'Sensitivity', desc: '敏感度' },
+      { key: 'specificity', label: 'Specificity', desc: '特異度' },
+      { key: 'lr_pos',      label: 'LR+',         desc: '陽性似然比' },
+      { key: 'lr_neg',      label: 'LR−',         desc: '陰性似然比' },
+      { key: 'ppv',         label: 'PPV',         desc: '陽性預測值' },
+      { key: 'npv',         label: 'NPV',         desc: '陰性預測值' },
+      { key: 'auc',         label: 'AUC',         desc: 'ROC 曲線下面積' },
+    ];
+  }
+  const visible = fields.filter(f => stats[f.key] != null);
+  if (visible.length === 0) return '';
+  const cells = visible.map(f => `
+    <div style="background:#f0f4f8; border-radius:8px; padding:8px 10px; text-align:center; min-width:85px;">
+      <div style="font-size:10px; color:#636e72; font-weight:600;">${f.label}</div>
+      <div style="font-size:14px; font-weight:700; color:#2c3e50; word-break:break-word;">${stats[f.key]}</div>
+      <div style="font-size:10px; color:#95a5a6;">${f.desc}</div>
+    </div>`).join('');
+  const noteHTML = stats.note
+    ? `<p style="margin:8px 0 0; font-size:12px; color:#7f8c8d;">📝 ${stats.note}</p>` : '';
+  return `
+    <div style="margin:12px 0;">
+      <strong style="color:#2c3e50; font-size:13px;">📐 EBM 關鍵數值</strong>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">${cells}</div>
+      ${noteHTML}
+    </div>`;
+}
+
 function renderArticles(articles, container) {
   container.innerHTML = articles.map(a => {
     const color = CATEGORY_COLORS[a.category] || '#7f8c8d';
@@ -154,6 +196,7 @@ function renderArticles(articles, container) {
           <div><strong style="color:#2c3e50;">背景</strong><p style="margin:4px 0 0; font-size:14px;">${a.background}</p></div>
           <div><strong style="color:#2c3e50;">方法</strong><p style="margin:4px 0 0; font-size:14px;">${a.methods}</p></div>
           <div><strong style="color:#2c3e50;">結果</strong><p style="margin:4px 0 0; font-size:14px;">${a.results}</p></div>
+          ${renderEbmBlock(a)}
           <div><strong style="color:#2c3e50;">結論</strong><p style="margin:4px 0 0; font-size:14px;">${a.conclusion}</p></div>
         </div>
         ${a.pmid ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${a.pmid}/" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:#2980b9;">PubMed →</a>` : ''}
